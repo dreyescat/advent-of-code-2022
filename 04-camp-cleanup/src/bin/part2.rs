@@ -9,7 +9,7 @@ fn main() {
             let (a1, a2) = assignment.split_once(',').unwrap();
             assignment_pair(a1, a2)
         })
-        .filter(|(range1, range2)| range1.contains(range2) || range2.contains(range1))
+        .filter(|(range1, range2)| range1.overlaps(range2))
         .count();
 
     println!("{:?}", score);
