@@ -42,7 +42,7 @@ fn main() {
                 .collect::<Vec<_>>()
         })
         .for_each(|m| {
-            stacks.arrange(m[0], m[1] - 1, m[2] - 1);
+            stacks.arrange_in_order(m[0], m[1] - 1, m[2] - 1);
         });
 
     println!("{:?}", stacks.tops().into_iter().collect::<String>());

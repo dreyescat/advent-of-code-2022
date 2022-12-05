@@ -19,6 +19,15 @@ impl Stacks {
         self.stacks[n].pop()
     }
 
+    pub fn arrange_in_order(&mut self, n: usize, from: usize, to: usize) {
+        let mut f = vec![];
+        for _i in 0..n {
+            f.push(self.pop(from).unwrap())
+        }
+        f.reverse();
+        self.stacks[to].append(&mut f);
+    }
+
     pub fn arrange(&mut self, n: usize, from: usize, to: usize) {
         // Using a temporary vector because I have not been able to solve the
         // problem with borrowing two mutable:
@@ -28,9 +37,7 @@ impl Stacks {
         for _i in 0..n {
             f.push(self.pop(from).unwrap())
         }
-        for i in f {
-            self.push(to, i);
-        }
+        self.stacks[to].append(&mut f);
     }
 
     // What about an iterator...
