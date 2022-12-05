@@ -82,3 +82,15 @@ pub fn read_stacks(reader: &mut impl BufRead) -> Stacks {
 
     stacks
 }
+
+pub fn read_moves(reader: &mut impl BufRead) -> impl Iterator<Item = Vec<usize>> + '_ {
+    reader.lines().map(|line| {
+        // "move n from i to j"
+        line.unwrap()
+            .split(' ')
+            .skip(1)
+            .step_by(2)
+            .map(|x| x.parse::<usize>().unwrap())
+            .collect::<Vec<_>>()
+    })
+}
