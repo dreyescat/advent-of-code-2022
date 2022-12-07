@@ -4,6 +4,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+const DISK_SPACE: u32 = 70_000_000;
+const UPDATE_SPACE: u32 = 30_000_000;
+
 fn main() {
     let mut filesystem = HashMap::new();
     let mut path = PathBuf::new();
@@ -33,6 +36,13 @@ fn main() {
 
     let total_size: u32 = filesystem.values().filter(|&value| *value <= 100000).sum();
     println!("{}", total_size);
+
+    let required_space = UPDATE_SPACE - (DISK_SPACE - filesystem.get("/").unwrap());
+    let directory_size = filesystem
+        .values()
+        .filter(|&value| *value > required_space)
+        .min();
+    println!("{}", directory_size.unwrap());
 }
 
 fn update_sizes(filesystem: &mut HashMap<String, u32>, path: &Path, size: u32) {
