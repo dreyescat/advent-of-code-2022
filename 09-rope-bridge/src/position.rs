@@ -2,22 +2,21 @@ use std::str::FromStr;
 
 #[derive(Debug)]
 pub enum Motion {
-    Right(i32),
-    Left(i32),
-    Up(i32),
-    Down(i32),
+    Right,
+    Left,
+    Up,
+    Down,
 }
 
 impl FromStr for Motion {
     type Err = ();
 
     fn from_str(input: &str) -> Result<Motion, Self::Err> {
-        let (direction, steps) = input.split_once(' ').unwrap();
-        match (direction.chars().next().unwrap(), steps.parse().unwrap()) {
-            ('R', steps) => Ok(Motion::Right(steps)),
-            ('L', steps) => Ok(Motion::Left(steps)),
-            ('U', steps) => Ok(Motion::Up(steps)),
-            ('D', steps) => Ok(Motion::Down(steps)),
+        match input.chars().next().unwrap() {
+            'R' => Ok(Motion::Right),
+            'L' => Ok(Motion::Left),
+            'U' => Ok(Motion::Up),
+            'D' => Ok(Motion::Down),
             _ => Err(()),
         }
     }
@@ -36,10 +35,10 @@ impl Position {
 
     pub fn motion(&mut self, motion: &Motion) {
         match motion {
-            Motion::Right(steps) => self.y += steps,
-            Motion::Left(steps) => self.y -= steps,
-            Motion::Up(steps) => self.x += steps,
-            Motion::Down(steps) => self.x -= steps,
+            Motion::Right => self.y += 1,
+            Motion::Left => self.y -= 1,
+            Motion::Up => self.x += 1,
+            Motion::Down => self.x -= 1,
         }
     }
 
