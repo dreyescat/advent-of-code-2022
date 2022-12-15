@@ -1,0 +1,73 @@
+use std::fmt;
+
+pub struct Monkey {
+    pub items: Vec<u64>,
+    pub operation: Box<dyn Fn(u64) -> u64>,
+    pub test: Box<dyn Fn(u64) -> u64>,
+}
+
+// Implement Debug trait because Functions does not implement the default Debug.
+impl fmt::Debug for Monkey {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Monkey")
+            .field("items", &self.items)
+            .finish()
+    }
+}
+
+impl Monkey {
+    pub fn from_vec(attributes: &[String]) -> Self {
+        Self {
+            items: attributes[1]
+                .strip_prefix("  Starting items: ")
+                .unwrap()
+                .split(", ")
+                .map(|item| item.parse().unwrap())
+                .collect(),
+            operation: {
+                let (operator, value) = attributes[2]
+                    .strip_prefix("  Operation: new = old ")
+                    .unwrap()
+                    .split_once(' ')
+                    .unwrap();
+                match (operator, value) {
+                    ("+", "old") => Box::new(|x| x + x),
+                    ("*", "old") => Box::new(|x| x * x),
+                    ("+", val) => {
+                        let val: u64 = val.parse().unwrap();
+                        Box::new(move |x| x + val)
+                    }
+                    ("*", val) => {
+                        let val: u64 = val.parse().unwrap();
+                        Box::new(move |x| x * val)
+                    }
+                    _ => panic!("Unsupported operation {} {}", operator, value),
+                }
+            },
+            test: {
+                let divisor: u64 = attributes[3]
+                    .strip_prefix("  Test: divisible by ")
+                    .unwrap()
+                    .parse()
+                    .unwrap();
+                let right_monkey = attributes[4]
+                    .strip_prefix("    If true: throw to monkey ")
+                    .unwrap()
+                    .parse()
+                    .unwrap();
+                let left_monkey = attributes[5]
+                    .strip_prefix("    If false: throw to monkey ")
+                    .unwrap()
+                    .parse()
+                    .unwrap();
+                Box::new(move |x| {
+                    if x % divisor == 0 {
+                        right_monkey
+                    } else {
+                        left_monkey
+                    }
+                })
+            },
+        }
+    }
+}
