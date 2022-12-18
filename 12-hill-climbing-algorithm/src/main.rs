@@ -4,6 +4,7 @@ use std::io;
 
 fn main() {
     let mut heightmap: Vec<Vec<u8>> = vec![];
+    let mut starts = vec![];
     let mut start = Square(0, 0);
     let mut end = Square(0, 0);
     for (x, line) in io::stdin().lines().enumerate() {
@@ -18,6 +19,10 @@ fn main() {
                     end = Square(x, y);
                     row.push(b'z');
                 }
+                b'a' => {
+                    starts.push(Square(x, y));
+                    row.push(byte);
+                }
                 _ => row.push(byte),
             }
         }
@@ -26,13 +31,20 @@ fn main() {
 
     let path = climbing_path(&heightmap, start, end);
 
-    println!("{:?}", path.len() - 1);
+    println!("{:?}", path.unwrap().len() - 1);
+
+    let min = starts
+        .into_iter()
+        .filter_map(|start| Some(climbing_path(&heightmap, start, end)?.len()))
+        .min();
+
+    println!("{}", min.unwrap() - 1);
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Square(usize, usize);
 
-fn climbing_path(heightmap: &Vec<Vec<u8>>, start: Square, end: Square) -> Vec<Square> {
+fn climbing_path(heightmap: &Vec<Vec<u8>>, start: Square, end: Square) -> Option<Vec<Square>> {
     // g = distance from initial Square
     let mut g: HashMap<Square, u32> = HashMap::new();
     g.insert(start, 0);
@@ -45,13 +57,12 @@ fn climbing_path(heightmap: &Vec<Vec<u8>>, start: Square, end: Square) -> Vec<Sq
     let mut f: HashMap<Square, u32> = HashMap::new();
     loop {
         let current = min_distance(&mut open, &f);
-        //dbg!(&current, &open, &f);
         if current == end {
-            break;
+            return Some(to_path(from, end));
         }
 
         // frontier squares
-        for square in frontier(&heightmap, &current) {
+        for square in frontier(heightmap, &current) {
             let score = g.get(&current).unwrap() + 1;
             if score < *g.get(&square).unwrap_or(&u32::MAX) {
                 from.insert(square, current);
@@ -62,11 +73,9 @@ fn climbing_path(heightmap: &Vec<Vec<u8>>, start: Square, end: Square) -> Vec<Sq
         }
 
         if open.is_empty() {
-            break;
+            return None;
         }
     }
-
-    to_path(from, end)
 }
 
 fn to_path(from: HashMap<Square, Square>, to: Square) -> Vec<Square> {
